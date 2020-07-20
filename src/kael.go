@@ -7,9 +7,10 @@ import (
 )
 
 func main() {
-	confPath := flag.String("config", "", "")
+	confPath := flag.String("config", "", "config file path")
+	runPath := flag.String("path", "", "")
 	flag.Parse()
-	config.InitConfigInstance(*confPath)
+	config.InitConfigInstance(*confPath, *runPath)
 	fmt.Println(config.Config().GetSectionValues("server.ips"))
 	fmt.Println(config.Config().Get("", "locale"))
 }

@@ -8,27 +8,31 @@ import (
 
 type _Config struct {
 	file *ini.File
+	runPath string
 }
 
-var configInstance *_Config
-var once sync.Once
+var (
+	configInstance *_Config
+	once           sync.Once
+)
 
-func InitConfigInstance(path string) *_Config {
+func InitConfigInstance(path string, runPath string) *_Config {
 	once.Do(func() {
 		configInstance = new(_Config)
 		configInstance.LoadConfFromFile(path)
+		configInstance.runPath = runPath
 	})
 	return configInstance
 }
 
 func Config() *_Config {
-	if configInstance == nil{
+	if configInstance == nil {
 		panic("configInstance is nil")
 	}
 	return configInstance
 }
 
-func (c _Config) LoadConfFromFile(path string) {
+func (c _Config) LoadConfFromFile(path string) *_Config {
 	cfg, err := ini.ShadowLoad(path)
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
@@ -36,6 +40,7 @@ func (c _Config) LoadConfFromFile(path string) {
 	}
 	c.file = cfg
 	configInstance.file = cfg
+	return configInstance
 }
 
 func (c _Config) Get(section string, key string) *ini.Key {
