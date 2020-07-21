@@ -19,7 +19,12 @@ var (
 func InitConfigInstance(path string, runPath string) *_Config {
 	once.Do(func() {
 		configInstance = new(_Config)
-		configInstance.LoadConfFromFile(path)
+		cfg, err := ini.ShadowLoad(path)
+		if err != nil {
+			fmt.Printf("Fail to read file: %v", err)
+			panic("Fail to read file")
+		}
+		configInstance.file = cfg
 		configInstance.runPath = runPath
 	})
 	return configInstance
@@ -39,8 +44,7 @@ func (c _Config) LoadConfFromFile(path string) *_Config {
 		panic("Fail to read file")
 	}
 	c.file = cfg
-	configInstance.file = cfg
-	return configInstance
+	return &c
 }
 
 func (c _Config) Get(section string, key string) *ini.Key {

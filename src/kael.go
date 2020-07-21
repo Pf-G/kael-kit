@@ -13,4 +13,6 @@ func main() {
 	config.InitConfigInstance(*confPath, *runPath)
 	fmt.Println(config.Config().GetSectionValues("server.ips"))
 	fmt.Println(config.Config().Get("", "locale"))
+
+	fmt.Print(config.Locale("hello, world", config.Locale("nice")))
 }
