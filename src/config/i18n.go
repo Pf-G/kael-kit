@@ -17,9 +17,14 @@ var (
 	onceLocale     sync.Once
 )
 
-func Locale(langKey string, values ...interface{}) string {
-	currentLocale := Config().Get("", "locale").Value()
+func (c _Locale) setLocale(locale string) _Locale {
+	c.locale = locale
+	return c
+}
+
+func initLocaleFromINI(){
 	onceLocale.Do(func() {
+		currentLocale := Config().Get("", "locale").Value()
 		localeInstance = new(_Locale)
 		localeInstance.locale = currentLocale
 		items := Config().GetKeys(configSection)
@@ -29,9 +34,31 @@ func Locale(langKey string, values ...interface{}) string {
 			localeInstance.localeMaps[item.Name()] = new(_Config).LoadConfFromFile(langPath)
 		}
 	})
-	result := langKey
+}
+
+func Locale(txtKey string, values ...interface{}) string {
+	initLocaleFromINI()
+	result := txtKey
 	if _, ok := localeInstance.localeMaps[localeInstance.locale]; ok {
-		result = localeInstance.localeMaps[localeInstance.locale].Get("", langKey).Value()
+		result = localeInstance.localeMaps[localeInstance.locale].Get("", txtKey).Value()
+	}
+	for key, value := range values {
+		values[key] = Locale(value.(string))
+	}
+	return fmt.Sprintf(result, values...)
+}
+
+func LocaleE(locale string, txtKey string, values ...interface{}) string {
+	initLocaleFromINI()
+	if locale == "" {
+		return Locale(txtKey, values...)
+	}
+	result := txtKey
+	if _, ok := localeInstance.localeMaps[locale]; ok {
+		result = localeInstance.localeMaps[locale].Get("", txtKey).Value()
+	}
+	for key, value := range values {
+		values[key] = LocaleE(locale, value.(string))
 	}
 	return fmt.Sprintf(result, values...)
 }

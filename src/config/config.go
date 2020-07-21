@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
+	"github.com/Pf-G/kael-kit/src/share"
 	"gopkg.in/ini.v1"
 	"sync"
 )
 
 type _Config struct {
-	file *ini.File
+	file    *ini.File
 	runPath string
 }
 
@@ -18,6 +19,12 @@ var (
 
 func InitConfigInstance(path string, runPath string) *_Config {
 	once.Do(func() {
+		if path == "" {
+			path = share.GetDefaultConfigPath()
+		}
+		if runPath == "" {
+			runPath = share.GetRunPath()
+		}
 		configInstance = new(_Config)
 		cfg, err := ini.ShadowLoad(path)
 		if err != nil {
@@ -32,7 +39,7 @@ func InitConfigInstance(path string, runPath string) *_Config {
 
 func Config() *_Config {
 	if configInstance == nil {
-		panic("configInstance is nil")
+		InitConfigInstance(share.GetDefaultConfigPath(), share.GetRunPath())
 	}
 	return configInstance
 }
